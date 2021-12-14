@@ -39,7 +39,7 @@ def create_dataframe() -> pd.DataFrame:
 
     academic = pc.select("ACADEMIC", 
         fields=['PEOPLE_CODE_ID', 'ACADEMIC_YEAR', 'ACADEMIC_TERM', 'ADMIT_YEAR', 'ADMIT_TERM'],
-        where=f"ACADEMIC_YEAR>='{int(current_year)-1}' and ACADEMIC_TERM IN ('FALL', 'SPRING') and ACADEMIC_SESSION=''" +
+        where=f"ACADEMIC_YEAR>='{int(current_year)}' and ACADEMIC_TERM IN ('FALL', 'SPRING') and ACADEMIC_SESSION=''" +
             "and PRIMARY_FLAG='Y' and CREDITS>0 and CURRICULUM<>'ADVST' and PROGRAM='U'" + 
             "and ADMIT_YEAR IS NOT NULL", 
         )
@@ -54,6 +54,7 @@ def create_dataframe() -> pd.DataFrame:
                 .reset_index()
                 )
     academic['admit_yearterm'] = academic['ADMIT_YEAR'] + '.' +  academic['ADMIT_TERM'].str.title()
+    academic = academic.loc[(academic['yearterm_sort']>=int(current_yt_sort))]
      
 
     people = pc.select('PEOPLE',
@@ -111,7 +112,7 @@ def create_dataframe() -> pd.DataFrame:
         fields=['PEOPLE_CODE_ID', 'ACADEMIC_YEAR', 'ACADEMIC_TERM', 'ACADEMIC_SESSION', 
                 'RESIDENT_COMMUTER', 'FOOD_PLAN', 'DORM_PLAN', 'DORM_BUILDING', 'DORM_ROOM',
                 ],
-        where=f"ACADEMIC_YEAR>='{int(current_year)-2}' and ACADEMIC_YEAR<'{int(current_year)+1}' and ACADEMIC_TERM IN ('FALL', 'SPRING') and ACADEMIC_SESSION=''",
+        where=f"ACADEMIC_YEAR>='{int(current_year)}' and ACADEMIC_YEAR<'{int(current_year)+1}' and ACADEMIC_TERM IN ('FALL', 'SPRING') and ACADEMIC_SESSION=''",
         distinct=True
         )
     residency = pc.add_col_yearterm(residency)
@@ -166,8 +167,8 @@ def create_dataframe() -> pd.DataFrame:
         'external_auth_id',
         'session',
         'term',
-        'building',
-        'room',
+        # 'building',
+        # 'room',
         'gender',
         'admit_term',
         'birthdate',
