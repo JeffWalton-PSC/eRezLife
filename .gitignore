@@ -7,6 +7,9 @@ sftp_test.py
 # git 
 .git/
 
+# VS Code
+.vscode/
+
 # ignore input/output files
 *.txt
 *.csv
