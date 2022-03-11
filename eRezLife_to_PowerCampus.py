@@ -2,8 +2,6 @@ import csv
 import os
 import sys
 import datetime as dt
-# import pandas as pd
-# import pysftp
 import requests
 import urllib3
 from loguru import logger
@@ -15,7 +13,6 @@ from sqlalchemy.orm import sessionmaker
 
 
 import local_db
-import powercampus as pc
 
 
 logger.add(sys.stderr, level="WARNING")
@@ -23,7 +20,7 @@ logger.add(
     "logs/eRezLife_to_PowerCampus.log",
     rotation="monthly",
     format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {name} | {message}",
-    level="DEBUG",
+    level="INFO",
 )
 
 
@@ -81,15 +78,14 @@ def main():
         new_rec_count = 0
         updated_rec_count = 0
         for row in reader:
-            # print(r)
             year, term  = row['Session ERP/SIS term code'].split('.')
             term = term.upper()
             student_id = row['Student ID']
-            logger.info(f"{row['Student ID']} {year} {term}")
+            logger.debug(f"{row['Student ID']} {year} {term}")
             if (row['Application status']=='Accepted Offer'):
                 new_building = row['building_code']
                 new_room = row['room_id']
-                logger.info(f"{year=}, {term=}, {student_id=}, {new_building=}, {new_room=}")
+                logger.debug(f"{year=}, {term=}, {student_id=}, {new_building=}, {new_room=}")
                 with Session() as session:
                     # check for existing recored
                     result = ( session.query(residency)
@@ -99,7 +95,7 @@ def main():
                             .first()
                     )
                     if not result:
-                        logger.info(f"Create record: {student_id=}, ")
+                        logger.info(f"Create record: {student_id=}, {year=}, {term=}, ")
                         create_sql = f"exec dbo.sp_create_residency '{student_id}','{year}','{term}','MAIN','eRezLife','0001'"
                         try:
                             session.execute(create_sql)
@@ -111,15 +107,13 @@ def main():
                         current_building = None
                         current_room = None
                     else:
-                        # print(result)
                         current_building = result[10]
                         current_room = result[11]
-                        logger.info(f"Existing record: {student_id=}, {current_building=}, {current_room=}")
+                        logger.debug(f"Existing record: {student_id=}, {current_building=}, {current_room=}")
                     
                     # update building, room
                     if (new_building != current_building) or (new_room != current_room):
-                        # update building, room
-                        logger.info(f"Updating: {year=}, {term=}, {student_id=}, {new_building=}, {new_room=}")
+                        logger.info(f"Updating: {student_id=}, {year=}, {term=}, {new_building=}, {new_room=}")
                         u = update(residency).where(
                             and_(
                                 residency.c.PEOPLE_CODE_ID == student_id,
