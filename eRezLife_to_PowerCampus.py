@@ -15,6 +15,7 @@ from sqlalchemy.orm import sessionmaker
 import local_db
 
 
+logger.add(sys.stdout, level="WARNING")
 logger.add(sys.stderr, level="WARNING")
 logger.add(
     "logs/eRezLife_to_PowerCampus.log",
@@ -60,12 +61,12 @@ def download_file()  -> str:
 
 
 def main():
-    logger.info(f'eRezLife_to_PowerCampus Start: {dt.datetime.now()}')
+    logger.info(f"eRezLife_to_PowerCampus Start: {dt.datetime.now()}")
 
-    logger.info(f'Begin: download_files()')
+    logger.info(f"Begin: download_files()")
     csv_filename = download_file()
     logger.debug(f"download file: {csv_filename}")
-    logger.info(f'End: download_files()')
+    logger.info(f"End: download_files()")
 
     connection = local_db.connection(test=True)
     engine = connection.engine
@@ -87,7 +88,7 @@ def main():
                 new_room = row['room_id']
                 logger.debug(f"{year=}, {term=}, {student_id=}, {new_building=}, {new_room=}")
                 with Session() as session:
-                    # check for existing recored
+                    # check for existing record
                     result = ( session.query(residency)
                             .filter(residency.c.PEOPLE_CODE_ID == student_id)
                             .filter(residency.c.ACADEMIC_YEAR == year)
@@ -100,10 +101,10 @@ def main():
                         try:
                             session.execute(create_sql)
                             session.commit()
+                            new_rec_count += 1
                         except IntegrityError as error:
-                            logger.error(f'Create {student_id}: {create_sql}')
+                            logger.error(f"Create {student_id}: {create_sql}")
                             logger.error(error)                    
-                        new_rec_count += 1
                         current_building = None
                         current_room = None
                     else:
@@ -135,16 +136,16 @@ def main():
                         try:
                             session.execute(u)
                             session.commit()
+                            updated_rec_count += 1
                         except IntegrityError as error:
-                            logger.error(f'Update {student_id}: {u.compile(engine)}')
+                            logger.error(f"Update {student_id}: {u.compile(engine)}")
                             logger.error(error)                    
-                        updated_rec_count += 1
 
         logger.info(f"Records created: {new_rec_count}, Records updated: {updated_rec_count}")
 
-    logger.info(f'eRezLife_to_PowerCampus End: {dt.datetime.now()}')
+    logger.info(f"eRezLife_to_PowerCampus End: {dt.datetime.now()}")
 
 
 if __name__ == "__main__":
-    logger.info(f'cwd: {os.getcwd()}')
+    logger.info(f"cwd: {os.getcwd()}")
     main()

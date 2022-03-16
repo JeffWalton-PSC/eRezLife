@@ -3,6 +3,10 @@ Documentation/
 Files/
 Scripts/
 sftp_test.py
+*.env
+
+# python environment
+envs/
 
 # git 
 .git/
