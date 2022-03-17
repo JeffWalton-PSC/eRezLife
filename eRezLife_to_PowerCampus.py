@@ -15,6 +15,7 @@ from sqlalchemy.orm import sessionmaker
 import local_db
 
 
+logger.remove()
 logger.add(sys.stdout, level="WARNING")
 logger.add(sys.stderr, level="WARNING")
 logger.add(
@@ -68,7 +69,8 @@ def main():
     logger.debug(f"download file: {csv_filename}")
     logger.info(f"End: download_files()")
 
-    connection = local_db.connection(test=True)
+    # local_db.print_connection_variables(test='write')
+    connection = local_db.connection(test='write')
     engine = connection.engine
     Session = sessionmaker(engine)
     metadata = MetaData()

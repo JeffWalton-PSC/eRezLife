@@ -9,6 +9,7 @@ from pathlib import WindowsPath
 import powercampus as pc
 
 
+logger.remove()
 logger.add(sys.stdout, level="WARNING")
 logger.add(sys.stderr, level="WARNING")
 logger.add(
