@@ -16,15 +16,15 @@ logger.add(
     "logs/eRezLife.log",
     rotation="monthly",
     format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {name} | {message}",
-    level="INFO",
+    level="DEBUG",
 )
 
-app_path = WindowsPath(r"E:\Applications\ResidenceLife\eRezLife")
+app_path = WindowsPath(r"F:\Applications\eRezLife")
 data_path = app_path / "Files"
 studentlists_path = data_path / "studentlists"
 studentpics_path = data_path / "studentpics"
 output_file = studentlists_path / "residence_applicants.csv"
-image_path = WindowsPath(r"E:\Applications\Starfish\Files\prod\sisdatafiles\studentFiles\studentPhotos")
+image_path = WindowsPath(r"F:\Applications\Starfish\Files\prod\sisdatafiles\studentFiles\studentPhotos")
     
 
 def create_dataframe() -> pd.DataFrame:
@@ -190,10 +190,13 @@ def sftp_connection():
     logger.info(f'SFTP connection: {hn=}')
     un = os.environ.get("eRezLife_username")
     logger.info(f'SFTP connection: {un=}')
-    pk = app_path / ".ssh" / "private_key_eRezLife.key"
-    # logger.debug(f"private_key: {pk=}")
+    # private key
+    pk = app_path / ".ssh" / "eRezLife.key"
+    logger.debug(f"private_key file: {pk=}")
+    # private key passphrase
     pkp = os.environ.get("eRezLife_pkp")
     # logger.debug(f'SFTP connection: {pkp=}')
+    # known hosts
     known_hosts = app_path / ".ssh" / "sftp.us.erezlife.com_hostkey.key"
     cnopts = pysftp.CnOpts(knownhosts=known_hosts)
     cnopts.hostkeys.load(known_hosts)

@@ -31,7 +31,8 @@ def download_file()  -> str:
     today = dt.datetime.today()
     today_str = today.strftime("%Y%m%d_%H%M")
 
-    app_path = WindowsPath(r"\\psc-data\E\Applications\ResidenceLife\eRezLife")
+    app_path = WindowsPath(r"F:\Applications\eRezLife")
+    # app_path = WindowsPath(r"\\psc-data\DATA\Applications\eRezLife")
     # app_path = WindowsPath(r"E:\Applications\ResidenceLife\eRezLife")
     data_path = app_path / "Files"
     downloads_path = data_path / "downloads"
@@ -69,12 +70,14 @@ def main():
     logger.debug(f"download file: {csv_filename}")
     logger.info(f"End: download_files()")
 
+    logger.info(f"Begin: local_db.connection(test='write')")
     # local_db.print_connection_variables(test='write')
     connection = local_db.connection(test='write')
     engine = connection.engine
     Session = sessionmaker(engine)
     metadata = MetaData()
     residency = Table('RESIDENCY', metadata, autoload=True, autoload_with=engine)
+    logger.info(f"End: local_db.connection(test='write')")
 
     with open(csv_filename, encoding='utf-8-sig') as csvfile:
         reader = csv.DictReader(csvfile)
