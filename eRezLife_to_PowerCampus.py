@@ -92,59 +92,66 @@ def main():
                 new_building = row['building_code']
                 new_room = row['room_id']
                 logger.debug(f"{year=}, {term=}, {student_id=}, {new_building=}, {new_room=}")
-                with Session() as session:
-                    # check for existing record
-                    result = ( session.query(residency)
-                            .filter(residency.c.PEOPLE_CODE_ID == student_id)
-                            .filter(residency.c.ACADEMIC_YEAR == year)
-                            .filter(residency.c.ACADEMIC_TERM == term)
-                            .first()
-                    )
-                    if not result:
-                        logger.info(f"Create record: {student_id=}, {year=}, {term=}, ")
-                        create_sql = f"exec dbo.sp_create_residency '{student_id}','{year}','{term}','MAIN','eRezLife','0001'"
-                        try:
-                            session.execute(create_sql)
-                            session.commit()
-                            new_rec_count += 1
-                        except IntegrityError as error:
-                            logger.error(f"Create {student_id}: {create_sql}")
-                            logger.error(error)                    
-                        current_building = None
-                        current_room = None
-                    else:
-                        current_building = result[10]
-                        current_room = result[11]
-                        logger.debug(f"Existing record: {student_id=}, {current_building=}, {current_room=}")
-                    
-                    # update building, room
-                    if (new_building != current_building) or (new_room != current_room):
-                        logger.info(f"Updating: {student_id=}, {year=}, {term=}, {new_building=}, {new_room=}")
-                        u = update(residency).where(
-                            and_(
-                                residency.c.PEOPLE_CODE_ID == student_id,
-                                residency.c.ACADEMIC_YEAR == year,
-                                residency.c.ACADEMIC_TERM == term,
-                                residency.c.ACADEMIC_SESSION == 'MAIN'
-                            )
+                if year and term and student_id:
+                    with Session() as session:
+                        # check for existing record
+                        result = ( session.query(residency)
+                                .filter(residency.c.PEOPLE_CODE_ID == student_id)
+                                .filter(residency.c.ACADEMIC_YEAR == year)
+                                .filter(residency.c.ACADEMIC_TERM == term)
+                                .first()
                         )
-                        u = u.values(
-                            RESIDENT_COMMUTER='R',
-                            FOOD_PLAN='STAN',
-                            DORM_PLAN='ROOM',
-                            DORM_CAMPUS='O000000001',
-                            DORM_BUILDING=new_building,
-                            DORM_ROOM=new_room
-                        )
-                        logger.debug(u.compile(engine))
+                        logger.debug(f"Result {student_id}: {result}")
+                        if not result:
+                            logger.info(f"Create record: {student_id=}, {year=}, {term=}")
+                            create_sql = f"exec dbo.sp_create_residency '{student_id}','{year}','{term}','MAIN','eRezLife','0001'"
+                            try:
+                                logger.info(f"Create {student_id}: {create_sql}")
+                                session.execute(create_sql)
+                                session.commit()
+                                new_rec_count += 1
+                            except IntegrityError as error:
+                                logger.error(f"Create {student_id}: {create_sql}")
+                                logger.error(error)                    
+                            current_building = None
+                            current_room = None
+                        else:
+                            current_building = result[10]
+                            current_room = result[11]
+                            logger.debug(f"Existing record: {student_id=}, {current_building=}, {current_room=}")
                         
-                        try:
-                            session.execute(u)
-                            session.commit()
-                            updated_rec_count += 1
-                        except IntegrityError as error:
-                            logger.error(f"Update {student_id}: {u.compile(engine)}")
-                            logger.error(error)                    
+                        # update building, room
+                        if (new_building != current_building) or (new_room != current_room):
+                            logger.info(f"Updating: {student_id=}, {year=}, {term=}, {new_building=}, {new_room=}")
+                            u = update(residency).where(
+                                and_(
+                                    residency.c.PEOPLE_CODE_ID == student_id,
+                                    residency.c.ACADEMIC_YEAR == year,
+                                    residency.c.ACADEMIC_TERM == term,
+                                    residency.c.ACADEMIC_SESSION == 'MAIN'
+                                )
+                            )
+                            u = u.values(
+                                RESIDENT_COMMUTER='R',
+                                FOOD_PLAN='STAN',
+                                DORM_PLAN='ROOM',
+                                DORM_CAMPUS='O000000001',
+                                DORM_BUILDING=new_building,
+                                DORM_ROOM=new_room
+                            )
+                            logger.debug(u.compile(engine))
+                            
+                            try:
+                                session.execute(u)
+                                session.commit()
+                                updated_rec_count += 1
+                            except IntegrityError as error:
+                                logger.error(f"Update {student_id}: {u.compile(engine)}")
+                                logger.error(error)
+                else:
+                    logger.error(f"Missing value: {year=}, {term=}, {student_id=}, {new_building=}, {new_room=}")
+                    continue
+
 
         logger.info(f"Records created: {new_rec_count}, Records updated: {updated_rec_count}")
 
