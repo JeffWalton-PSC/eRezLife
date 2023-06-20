@@ -22,7 +22,7 @@ logger.add(
     "logs/eRezLife_to_PowerCampus.log",
     rotation="monthly",
     format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {name} | {message}",
-    level="DEBUG",
+    level="INFO",
 )
 
 
@@ -84,7 +84,7 @@ def main():
         new_rec_count = 0
         updated_rec_count = 0
         for row in reader:
-            year, term  = row['Session ERP/SIS term code'].split('.')
+            term, year  = row['Session ERP/SIS term code'].split(' ')
             term = term.upper()
             student_id = row['Student ID']
             logger.debug(f"{row['Student ID']} {year} {term}")
