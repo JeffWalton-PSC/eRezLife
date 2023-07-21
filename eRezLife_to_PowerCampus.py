@@ -84,7 +84,14 @@ def main():
         new_rec_count = 0
         updated_rec_count = 0
         for row in reader:
-            term, year  = row['Session ERP/SIS term code'].split(' ')
+            term_code = row['Session ERP/SIS term code']
+            if '.' in term_code:
+                year, term  = term_code.split('.')
+            elif ' ' in term_code:
+                term, year  = term_code.split(' ')
+            else:
+                logger.error(f"'Session ERP/SIS term code' is not correct format {term_code=}.")
+                continue
             term = term.upper()
             student_id = row['Student ID']
             logger.debug(f"{row['Student ID']} {year} {term}")

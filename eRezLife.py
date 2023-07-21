@@ -159,6 +159,10 @@ def create_dataframe() -> pd.DataFrame:
                     axis=1,
                 )
             )
+    
+    # fix to change term formatting (2023-07-21)
+    students['term']  = students['ACADEMIC_TERM'] + ' ' + students['ACADEMIC_YEAR']
+    
     students['session'] = students['term']
 
     field_list = [
