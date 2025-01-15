@@ -42,8 +42,9 @@ def create_dataframe() -> pd.DataFrame:
     academic = pc.select("ACADEMIC", 
         fields=['PEOPLE_CODE_ID', 'ACADEMIC_YEAR', 'ACADEMIC_TERM', 'ADMIT_YEAR', 'ADMIT_TERM'],
         where=f"ACADEMIC_YEAR>='{int(current_year)}' and ACADEMIC_TERM IN ('FALL', 'SPRING') and ACADEMIC_SESSION=''" +
-            "and PRIMARY_FLAG='Y' and CREDITS>0 and CURRICULUM<>'ADVST' and PROGRAM='U'" + 
-            "and ADMIT_YEAR IS NOT NULL", 
+            "and PRIMARY_FLAG='Y' and ENROLL_SEPARATION NOT IN ('TBC') and CURRICULUM<>'ADVST' and PROGRAM='U'" # + 
+            # "and PRIMARY_FLAG='Y' and CREDITS>0 and CURRICULUM<>'ADVST' and PROGRAM='U'" # + 
+            # "and ADMIT_YEAR IS NOT NULL", 
         )
     academic = pc.add_col_yearterm(academic)
     academic = pc.add_col_yearterm_sort(academic)
